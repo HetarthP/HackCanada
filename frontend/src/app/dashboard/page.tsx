@@ -13,7 +13,7 @@ import { CldVideoPlayer } from "next-cloudinary";
 import "next-cloudinary/dist/cld-video-player.css";
 
 // This is the hardcoded path to the Cloudinary video
-const DEMO_RESULT_PUBLIC_ID = "Coke_results";
+const DEMO_RESULT_PUBLIC_ID = "0307_wpxwyd";
 
 const PIPELINE_STEPS = [
     {
