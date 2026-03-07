@@ -63,7 +63,7 @@ function DashboardContent() {
                         <div className="lg:col-span-2 space-y-4">
                             <div className="bg-gray-900/50 border border-teal-900/30 rounded-2xl p-2 md:p-4 overflow-hidden shadow-2xl">
                                 <div className="relative rounded-xl overflow-hidden bg-black border border-gray-800">
-                                    <VideoPlayer src="https://videos.pexels.com/video-files/30333849/13003128_2560_1440_25fps.mp4" />
+                                    <VideoPlayer src={videoId} />
                                 </div>
                             </div>
                         </div>
@@ -112,9 +112,9 @@ function DashboardContent() {
                                         View the generated placement map to fine-tune the scale and mapping of inserted brands.
                                     </p>
                                     <ShinyButton className="w-full">
-                                    <FolderPlus className="w-4 h-4 mr-2" />
-                                    New Project
-                                </ShinyButton>
+                                        <FolderPlus className="w-4 h-4 mr-2" />
+                                        New Project
+                                    </ShinyButton>
                                 </div>
                             </div>
                         </div>

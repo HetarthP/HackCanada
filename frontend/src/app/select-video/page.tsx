@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Plus, UploadCloud, Film } from "lucide-react";
 import { motion } from "framer-motion";
-import VideoUploader from "@/components/VideoUploader";
+import PipelineUploader from "@/components/PipelineUploader";
 import SearchBar from "@/components/SearchBar";
 import MovieCard from "@/components/MovieCard";
 import { useRouter } from "next/navigation";
@@ -131,7 +131,7 @@ export default function SelectVideoPage() {
                         {selection === "upload" && (
                             <div className="flex justify-center w-full">
                                 <div className="w-full max-w-md [&>div]:w-full [&>div]:bg-black [&>div]:border-2 [&>div]:border-dashed [&>div]:border-teal-900/50 hover:[&>div]:border-teal-500/50 [&>div]:rounded-2xl transition-all">
-                                    <VideoUploader onUpload={handleUpload} />
+                                    <PipelineUploader onComplete={handleUpload} />
                                 </div>
                             </div>
                         )}

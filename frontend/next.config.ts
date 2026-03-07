@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
         NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:
             process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     },
+    // Prevent Next.js from trying to bundle Node.js-only ffmpeg binaries into the client bundle
+    serverExternalPackages: ["fluent-ffmpeg", "@ffmpeg-installer/ffmpeg", "@ffmpeg-installer/darwin-arm64"],
 };
 
 export default nextConfig;
