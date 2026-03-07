@@ -1,11 +1,7 @@
-"""
-Videos router — upload handling & processing triggers.
-Stages 1-2: Ingestion → 3D Intelligence.
-"""
-
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from app.database import db
 from app.workers.tasks import process_video_task
 from app.auth import get_current_user, require_role
 
@@ -16,6 +12,7 @@ class VideoIngestRequest(BaseModel):
     """Sent after Cloudinary UploadWidget returns."""
     imdb_id: str
     cloudinary_public_id: str
+    title: str  # Movie title from OMDb search
 
 
 class ProcessRequest(BaseModel):
@@ -31,12 +28,27 @@ async def ingest_video(
     """
     Record a new video upload.
     Links imdbID → cloudinary_public_id in the database.
+    Idempotent: upserts so re-uploads don't crash.
     """
-    # TODO: Insert into Postgres via Prisma / SQLAlchemy
+    video = await db.video.upsert(
+        where={"imdbId": payload.imdb_id},
+        data={
+            "create": {
+                "imdbId": payload.imdb_id,
+                "publicId": payload.cloudinary_public_id,
+                "title": payload.title,
+            },
+            "update": {
+                "publicId": payload.cloudinary_public_id,
+                "title": payload.title,
+            },
+        },
+    )
     return {
         "status": "ingested",
-        "imdb_id": payload.imdb_id,
-        "cloudinary_public_id": payload.cloudinary_public_id,
+        "id": video.id,
+        "imdb_id": video.imdbId,
+        "cloudinary_public_id": video.publicId,
     }
 
 

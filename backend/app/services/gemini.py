@@ -26,6 +26,7 @@ class BoundingBox3D(BaseModel):
     roll: float
     pitch: float
     yaw: float
+    is_occluded: bool = False  # True if a foreground object (hand/body) overlaps this slot
 
 
 class AdSlotDetection(BaseModel):
@@ -56,14 +57,18 @@ For each suitable flat surface or placement area, return:
    - Coordinates are normalized 0-1 relative to the frame dimensions
    - Roll/pitch/yaw in degrees
 
-2. Scene environment data:
+2. Occlusion detection:
+   - is_occluded: true if any foreground object (hands, fingers, body parts) overlaps this ad slot area
+   - is_occluded: false if the slot surface is fully unobstructed
+
+3. Scene environment data:
    - Color temperature in Kelvin (e.g. 4500)
    - Shadow direction (e.g. "top-left")
    - Scene intent / mood (e.g. "Luxury Interior")
 
 Return the result as JSON with this structure:
 {
-  "slots": [{"x": ..., "y": ..., "z": ..., "w": ..., "h": ..., "d": ..., "roll": ..., "pitch": ..., "yaw": ...}],
+  "slots": [{"x": ..., "y": ..., "z": ..., "w": ..., "h": ..., "d": ..., "roll": ..., "pitch": ..., "yaw": ..., "is_occluded": false}],
   "kelvin": 4500,
   "shadow_direction": "top-left",
   "scene_intent": "Luxury Interior"

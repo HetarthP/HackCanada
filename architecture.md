@@ -1,6 +1,12 @@
-# Full-Stack VPP Architecture
+# System Architecture Documentation: Ghost-Merchant
+
+**Project:** AI-Native Virtual Product Placement (VPP) Marketplace
+**Goal:** Automate 3D product insertion into video using spatial grounding, Google MediaPipe pixel segmentation, and edge-side Cloudinary VFX rendering.
 
 ---
+
+## 🏗️ Architecture Overview
+Ghost-Merchant uses a Temporal-Spatial Pipeline managed by FastAPI and Celery. It solves the hardest problem in Virtual Product Placement—**Occlusion**—by combining 3D AI vision with pixel-level hand tracking to create an alpha-composited "Sandwich" render at the edge.
 
 ## 🏗️ 1. Infrastructure & Deployment Layer
 
@@ -10,8 +16,8 @@ Before any code runs, the environment is architected for high-performance media 
 |---|---|---|
 | **Frontend Hosting** | Vercel | Hosts the Next.js 15 app. Optimized for edge-rendering OMDb search results and streaming the Cloudinary Video Player. |
 | **API Orchestration** | AWS ECS Fargate | A containerized FastAPI cluster handling request routing, OMDb metadata fetching, and database transactions. |
-| **Heavy Compute** | Vultr GPU Nodes | Dedicated Ubuntu instances with NVIDIA GPUs running Celery Workers for FFmpeg frame shredding and local AI inference. |
-| **Database** | Postgres + Prisma (`prisma-client-py`) | Ghost-Merchant schema: Stores the `imdbID` movie index (`Video`) and 3D Ad Slots (`AdSlot` with JSON BBox coordinates). Typed Python client for FastAPI. |
+| **Heavy Compute** | Vultr GPU Nodes | Dedicated Ubuntu instances with NVIDIA GPUs running Celery Workers for Gemini routing, and Google MediaPipe Tasks Vision API pixel segmentation. Integrates with Vultr Python SDK for auto-provisioning with cost-safe `try...finally` tear-down. |
+| **Database** | Postgres + Prisma | Ghost-Merchant schema: Stores the `imdbId` movie index (`Video`) and 3D Ad Slots (`AdSlot` with JSON 9-point BBox coordinates). Typed Python client for FastAPI (`prisma-client-py`) using a dedicated `db` singleton. |
 | **Identity** | Auth0 | Manages Role-Based Access Control (RBAC) separating the Creator Dashboard (uploading) from the Brand Dashboard (bidding/placement). |
 
 ```mermaid
@@ -35,6 +41,7 @@ graph TD
         G["OMDb API"]
         H["Backboard.io"]
         I["Gemini 2.0 Flash"]
+        J["Google MediaPipe"]
     end
 
     A -->|API Requests| B
@@ -44,136 +51,116 @@ graph TD
     B -->|Read/Write| D
     B -->|Metadata| G
     C -->|Frame Extraction| E
-    C -->|3D Grounding| I
+    C -->|3D Grounding & Occlusion Check| I
+    C -->|Hand Segmentation (If Occluded)| J
     C -->|Temporal Smoothing| H
     E -->|Transformed Video| A
 ```
 
----
-
 ## 🚀 2. The Five-Stage Processing Pipeline
 
 ### Stage 1: Discovery & Media Ingestion
+**Goal:** Ingest video assets and catalog metadata securely.
+1. **Netflix-Style Discovery:** Frontend (Next.js) queries OMDb API for movie metadata (`imdbID`, Posters).
+2. **Cloudinary Ingestion:** Creators upload original footage via the Cloudinary `<UploadWidget />`.
+3. **Primary Store:** Cloudinary stores the master video and returns a `public_id`. Metadata is mirrored in Postgres (`Video` model).
+4. **Security:** Auth0 secures the APIs, separating Creator upload routes from Brand bidding routes.
 
-> **Goal:** Ingest assets and establish a content library.
-
-1. **OMDb Discovery** — The user searches via a Netflix-style UI. The system maps the film to a unique `imdbID`.
-2. **Cloudinary Ingestion** — Creators upload raw clips using the Cloudinary `<UploadWidget />`.
-3. **System Action** — Upon upload, Cloudinary returns a `public_id`. A record is created in Postgres linking `imdbID → cloudinary_public_id`.
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend as Next.js Frontend
-    participant OMDb as OMDb API
-    participant Cloudinary
-    participant DB as Postgres
-
-    User->>Frontend: Search for film
-    Frontend->>OMDb: Query by title
-    OMDb-->>Frontend: Return imdbID + metadata
-    User->>Cloudinary: Upload via <UploadWidget />
-    Cloudinary-->>Frontend: Return public_id
-    Frontend->>DB: Create record (imdbID → public_id)
-```
-
----
-
-### Stage 2: 3D Intelligence (The "Spatial Eye")
-
-> **Goal:** Convert 2D video into a 3D mapped environment.
-
-1. **Frame Extraction** — FastAPI triggers a Celery worker on Vultr. The worker calls Cloudinary's dynamic URL extraction (e.g., `f_jpg,so_10`) to pull keyframes without downloading the full video.
-2. **Vision Node (Gemini 2.0 Flash):**
-   - **3D Grounding** — Analyzes frames to detect "Ad Slots" (flat surfaces, hands).
-   - **Output** — Returns a 9-point 3D Bounding Box: `[x, y, z, w, h, d, roll, pitch, yaw]`.
-   - **Environmental Logic** — Detects Kelvin temperature (e.g., `4500K`) and shadow direction.
+### Stage 2: Spatial Intelligence (The "3D Eye" & Occlusion Detector)
+**Goal:** Extract the geometry, physics, and conflicts of the scene.
+1. **Frame Extraction:** FastAPI triggers a Celery worker on Vultr GPU. It fetches keyframes via Cloudinary URL transformations (e.g., `so_10,f_jpg`).
+2. **Vision Node (Gemini 2.0 Flash):** 
+   - **3D Grounding:** Detects surfaces and returns 9-point 3D Bounding Boxes: `[x, y, z, w, h, d, roll, pitch, yaw]`.
+   - **Environmental Sensing:** Extracts Kelvin color temperature and shadow vectors.
+   - **Conflict Detection:** Identifies if foreground objects overlap the ad slot and returns a boolean `is_occluded: true`.
 
 > [!TIP]
 > **Long-Form Video Optimization (45m+)**
 > Gemini 2.0 Flash has a 1-million-token context window, fitting ~45-55 mins of video. For feature films (2h+), FastAPI/Celery chunks the video into 30-min segments via FFmpeg and processes them in parallel.
-> To further stretch the token limit (up to 2.7 hours per request), we pass `mediaResolution: 'low'` to the Gemini API, preserving enough bounding box fidelity while saving tokens.
+> To stretch the token limit (up to 2.7 hours per request), we pass `mediaResolution: 'low'` to the Gemini API, preserving enough bounding box fidelity while saving tokens.
+
+### Stage 3: Temporal Orchestration (The "Memory")
+**Goal:** Eliminate jitter and handle object movement.
+1. **Temporal Resonance (Backboard.io):** Raw 3D coordinates are sent to Backboard.io.
+2. **Stateful Buffer:** Backboard compares coordinates across frames N and N+1. It returns a Stable Coordinate Path, locking the product to the scene geometry regardless of camera noise.
+
+### Stage 4: Foreground Extraction (The "Matte Creator")
+**Goal:** Isolate foreground elements (hands/fingers) when occlusion is detected.
+1. **Trigger:** If Gemini flags `is_occluded: true`, the FastAPI backend triggers the Segmentation Task on the Vultr GPU.
+2. **MediaPipe Tasks Vision Node:** Runs Google's modern `HandLandmarker` API (`mediapipe.tasks.vision`) on the specific frames. Instead of a rough bounding box, it detects the 21-point hand skeleton.
+3. **Output:** Generates a black-and-white "Alpha Matte" image where the hand's convex hull is filled white (visible) and the background is black (transparent). Uploads to Cloudinary `masks/` folder.
+
+### Stage 5: VFX Composition (The "Sandwich Method")
+**Goal:** Photorealistic alpha blending at the CDN edge.
+1. **Homography Calculation:** Backend projects the stable 3D box into 8 specific 2D coordinates (4 corner pairs).
+2. **Cloudinary VFX Engine:** Generates a dynamic, multi-layered transformation URL:
+   - **Layer 1 (Bottom Bread):** The original base video.
+   - **Layer 2 (The Meat):** The brand product (`l_product_png`), warped via `e_distort:x1:y1...`, and color-matched via `e_colorize` and `e_multiply`.
+   - **Layer 3 (Top Bread):** The MediaPipe hand mask (`l_hand_mask`), applied using `e_mask` or `e_cutout` so the actor's fingers perfectly overlap the digital product.
 
 ---
 
-### Stage 3: Temporal Orchestration (The "Consistency Memory")
+## 🎨 Flow Diagram (System Pipeline)
 
-> **Goal:** Lock the virtual object to the moving world.
-
-1. **Temporal Resonance (Backboard.io)** — Raw coordinates are streamed to Backboard.io.
-2. **Anti-Jitter Logic** — Backboard compares Frame *N* with Frame *N+1*. If Gemini's detection shifts by **< 2%**, Backboard "pins" the coordinate to prevent visual vibration.
-3. **Ad-Planner Agent** — A Backboard.io Agent reads the OMDb genre (e.g., *"Sci-Fi"*) and the Gemini scene intent (e.g., *"Luxury Interior"*) to auto-select the best brand asset from the catalog.
-
----
-
-### Stage 4: VFX Composition (The "Edge Renderer")
-
-> **Goal:** Apply high-end VFX without a rendering farm.
-
-1. **Homography Calculation** — The backend projects the 3D box vertices onto the 2D frame plane, resulting in **8 specific coordinates** (4 corner pairs).
-2. **Cloudinary Transformation** — The app generates a complex URL:
-   - `l_<brand_asset_id>` — The product overlay.
-   - `e_distort:x1:y1:x2:y2:x3:y3:x4:y4` — Warps the 2D PNG into the 3D perspective.
-   - `e_colorize` — Tints the product to match the scene's lighting.
-   - `e_multiply` — Blends the film's grain and shadows over the product for realism.
-
----
-
-### Stage 5: Interactive Display & Analytics
-
-> **Goal:** Engage the viewer and track performance.
-
-1. **Streaming** — The transformed video is rendered using `<CldVideoPlayer />`.
-2. **Interactive Layer** — A Tailwind-styled Canvas overlay triggers a *"Learn More"* button at the exact coordinates and timestamp of the placement.
-3. **Conversion Tracking** — Auth0-secured brand dashboards display *"Hover"* and *"Click"* metrics generated by the player.
-
-```mermaid
-graph LR
-    subgraph "Pipeline Flow"
-        S1["Stage 1: Discovery & Ingestion"] --> S2["Stage 2: 3D Intelligence"]
-        S2 --> S3["Stage 3: Temporal Orchestration"]
-        S3 --> S4["Stage 4: VFX Composition"]
-        S4 --> S5["Stage 5: Display & Analytics"]
-    end
+```text
+┌────────────────────────────────────────────────────────────────────────────┐
+│ 🎬 GHOST-MERCHANT PIPELINE (WITH OCCLUSION HANDLING)                       │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│ 1. USER ACTION: Search OMDb or Upload Video (Cloudinary Widget)            │
+│                                                                            │
+│ 2. ANALYSIS NODE (FastAPI + Vultr GPU)                                     │
+│ ┌──────────────────────────────────────────────────────────────────┐       │
+│ │ Cloudinary Extract → Gemini 2.0 Flash → 3D Box + is_occluded     │       │
+│ └──────────────────────────────────────────────────────────────────┘       │
+│           │                                       │                        │
+│           ▼ (if is_occluded: false)               ▼ (if is_occluded: true) │
+│ 3. ORCHESTRATION NODE                  3.5 SEGMENTATION NODE (Vultr GPU)   │
+│ ┌───────────────────────────┐          ┌───────────────────────────┐       │
+│ │ Backboard.io Path Locking │          │ Google MediaPipe Hand Mask│       │
+│ └───────────────────────────┘          └───────────────────────────┘       │
+│           │                                       │                        │
+│           └───────────────────┬───────────────────┘                        │
+│                               ▼                                            │
+│ 4. VFX RENDERING NODE (The Sandwich Method)                                │
+│ ┌──────────────────────────────────────────────────────────────────┐       │
+│ │ Layer 1: Base Video                                              │       │
+│ │ Layer 2: Product Warp (e_distort + e_multiply)                   │       │
+│ │ Layer 3: Hand Alpha Mask (e_mask)                                │       │
+│ └──────────────────────────────────────────────────────────────────┘       │
+│                                                                            │
+│ 5. FRONTEND: CldVideoPlayer (CDN) + Tailwind Interactive Overlay           │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🧩 3. Node-Level Deep Dive
+## 🧩 Deep Dive: Agent & Compute Nodes
 
-| Node | Model / Tech | Input | Output |
-|---|---|---|---|
-| **Vision** | Gemini 2.0 Flash | Cloudinary JPEGs | 3D BBox + Kelvin |
-| **Smoother** | Backboard.io | Raw 3D JSON | Stable Coordinate Path |
-| **Strategist** | Backboard Agent | OMDb + Brand DB | Optimal Asset Selection |
-| **VFX Artist** | Cloudinary Engine | Product PNG + Path | Photorealistic Video URL |
-
-```mermaid
-flowchart LR
-    Frames["Cloudinary JPEGs"] --> Vision["Vision Node\n(Gemini 2.0 Flash)"]
-    Vision -->|"3D BBox + Kelvin"| Smoother["Smoother\n(Backboard.io)"]
-    Smoother -->|"Stable Path"| Strategist["Strategist\n(Backboard Agent)"]
-    OMDb["OMDb Metadata"] --> Strategist
-    BrandDB["Brand DB"] --> Strategist
-    Strategist -->|"Selected Asset"| VFX["VFX Artist\n(Cloudinary Engine)"]
-    Smoother -->|"Coordinate Path"| VFX
-    VFX -->|"Photorealistic Video URL"| Player["CldVideoPlayer"]
-```
+| Node | Model / Tech | Input | Responsibilities | Output |
+|---|---|---|---|---|
+| **Vision** | Gemini 2.0 Flash | Cloudinary JPEGs | Detects "Semantic Ad Slots" and flags `is_occluded`. | 3D BBox, Kelvin, Occlusion flag |
+| **Matte Creator** | Google MediaPipe | Occluded Frames | High-speed pixel-perfect hand tracking for alphamask. | Alpha mask video/image to Cloudinary |
+| **Smoother** | Backboard.io | Raw 3D JSON | Prevents products from shaking (Temporal Consistency). | Stable Coordinate Path |
+| **Strategist** | Backboard Agent | OMDb + Brand DB | Suggests the most "contextually seamless" brand asset. | Selected Asset |
+| **VFX Artist** | Cloudinary Engine | Base + Meat + Mask | 4-point perspective warping, blending, alpha compositing. | Photorealistic Video URL |
 
 ---
 
-## 🛠️ 4. Full Tech Stack Summary
+## 🛠️ Tech Stack & Deployment Summary
 
-| Component | Technology | Implementation Detail |
+| Layer | Technology | Implementation |
 |---|---|---|
-| **Frontend** | Next.js 15 + TypeScript | `npx create-cloudinary-react` starter kit |
-| **Video Engine** | Cloudinary | `e_distort` for 3D perspective, `e_multiply` for blending |
-| **3D Vision** | Gemini 2.0 Flash | Native 3D Spatial Grounding and Scene Sensing |
-| **State Memory** | Backboard.io | Temporal Resonance for anti-jitter consistency |
-| **Metadata** | OMDb API | Netflix-style discovery and indexing via `imdbID` |
-| **Backend** | FastAPI + Celery | Async worker management for Vultr GPU tasks |
-| **Database** | Postgres + Prisma | Ghost-Merchant schema (`Video` ↔ `AdSlot` relations) with `prisma-client-py` for native FastAPI asyncio integration |
-| **Identity** | Auth0 | RBAC for secure Brand vs. Creator access |
+| **Frontend** | Next.js 15 + TS | Bootstrapped via `create-cloudinary-react`. |
+| **Video Platform** | Cloudinary | `<UploadWidget>`, `<CldVideoPlayer>`, `e_distort`, `e_mask`. |
+| **3D Engine** | Gemini 2.0 Flash | Native 3D Spatial Grounding for ad-slot detection. |
+| **Segmentation** | Google MediaPipe | Modern `Tasks Vision API` for pixel-perfect hand tracking running on Celery workers. |
+| **Memory** | Backboard.io | Temporal Resonance for anti-jitter Euclidean stabilization and AI Ad-Planner. |
+| **Auth** | Auth0 | Enterprise RBAC for Brand vs. Creator marketplace. |
+| **Backend** | FastAPI / Celery / Vultr | Async Vultr GPU tasks matching MediaPipe workloads with guaranteed teardown. |
+| **Database** | Postgres + Prisma | `prisma-client-py` Ghost-Merchant schema for fast lookups. |
+| **Deployment** | AWS (ECS/RDS) | Production-grade API and Database hosting. |
 
 ---
 

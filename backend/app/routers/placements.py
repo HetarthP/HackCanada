@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import Optional
 
+from app.database import db
 from app.auth import get_current_user, require_role
 
 router = APIRouter()
@@ -26,8 +27,9 @@ async def log_event(event: PlacementEvent):
     """
     Record a viewer interaction event.
     These feed the Brand Dashboard analytics.
+    NOTE: Intentional stub — no analytics table in Ghost-Merchant v1 schema.
+    Minimizes attack surface while the schema is lean.
     """
-    # TODO: Insert into Postgres analytics table
     return {"status": "logged", "event_type": event.event_type}
 
 
@@ -39,8 +41,8 @@ async def get_analytics(
     """
     Return aggregated placement metrics for a video.
     Auth0 RBAC: brand role required.
+    NOTE: Intentional stub — analytics aggregation deferred to v2.
     """
-    # TODO: Query Postgres for real metrics
     return {
         "video_id": video_id,
         "impressions": 0,
@@ -57,10 +59,18 @@ async def get_ad_slots(
 ):
     """
     Return detected 3D ad slots for a video.
-    Each slot contains 9-point bounding box coordinates.
+    Each slot has 9-point bounding box coordinates stored as JSON.
     """
-    # TODO: Query Postgres for stored 3D bboxes
+    slots = await db.adslot.find_many(
+        where={"videoId": video_id},
+    )
     return {
         "video_id": video_id,
-        "slots": [],
+        "slots": [{
+            "id": s.id,
+            "timestamp": s.timestamp,
+            "coordinates": s.coordinates,
+            "lighting": s.lighting,
+            "is_filled": s.isFilled,
+        } for s in slots],
     }

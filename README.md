@@ -7,12 +7,14 @@ AI-powered virtual product placement for video content. Detect 3D ad slots in vi
 | Layer | Technology |
 |---|---|
 | Frontend | Next.js 15 + TypeScript |
-| Video Engine | Cloudinary (e_distort, e_multiply) |
-| 3D Vision | Gemini 2.0 Flash |
-| State Memory | Backboard.io |
+| Video Engine | Cloudinary (e_distort, e_multiply, e_mask) |
+| 3D Vision | Gemini 2.0 Flash (Spatial Grounding) |
+| Foreground Masking | Google MediaPipe (Tasks Vision API) |
+| State Memory | Backboard.io (Temporal Stabilization) |
 | Metadata | OMDb API |
 | Backend | FastAPI + Celery |
-| Database | PostgreSQL + Prisma |
+| Database | PostgreSQL + Prisma (`prisma-client-py`) |
+| Compute | Vultr GPU Nodes (Auto-provisioned) |
 | Identity | Auth0 (RBAC) |
 
 ## Getting Started
@@ -51,13 +53,26 @@ cd backend
 celery -A app.workers.celery_app worker --loglevel=info
 ```
 
-### Database
+### Database (Prisma on Windows)
 
 ```bash
-cd frontend
+cd backend
+# Note: On Windows, use the shim to generate the Python client:
+prisma-client-py.cmd generate
+# For frontend schema:
+cd ../frontend
 npx prisma generate
-npx prisma db push
 ```
+
+## Backend API Endpoints
+
+| Method | Route | Description | Auth |
+|---|---|---|---|
+| `POST` | `/api/videos/ingest` | Idempotent upsert of OMDb movie + Cloudinary ID | Creator |
+| `POST` | `/api/videos/process` | Triggers Celery pipeline (Gemini + MediaPipe) | Creator |
+| `GET` | `/api/placements/slots/{id}` | Returns stabilized 3D AdSlots with JSON coordinates | Brand/Viewer |
+| `POST` | `/api/placements/events` | (v1 Stub) Logs viewer hover/clicks | Viewer |
+| `GET` | `/api/placements/analytics`| (v1 Stub) Aggregated placement metrics | Brand |
 
 ## Architecture
 

@@ -6,9 +6,8 @@ Run: uvicorn app.main:app --reload
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from prisma import Prisma
 
-db = Prisma()
+from app.database import db
 
 from app.config import settings
 from app.routers import movies, videos, placements

@@ -29,3 +29,7 @@ PyJWT[crypto]>=2.9.0
 # Database (async optional)
 psycopg2-binary>=2.9.10
 sqlalchemy>=2.0.36
+
+# MediaPipe + OpenCV (Stage 4: Occlusion Masking)
+mediapipe>=0.10.0
+opencv-python-headless>=4.10.0
