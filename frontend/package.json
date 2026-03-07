@@ -11,7 +11,7 @@
     "prisma:push": "prisma db push"
   },
   "dependencies": {
-    "@auth0/nextjs-auth0": "^3.8.0",
+    "@auth0/nextjs-auth0": "^4.16.0",
     "cloudinary": "^2.5.0",
     "next": "^15.0.0",
     "next-cloudinary": "^6.14.0",
