@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink, useSidebar } from "./ui/sidebar";
-import { Sparkles, Home, Library, Settings, Plus, MessageCircle } from "lucide-react";
+import { Sparkles, Home, Library, Settings, Plus, MessageCircle, LogOut } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -88,8 +88,24 @@ export function CustomSidebar() {
                     </div>
                 </div>
 
-                <div className="mt-auto px-2">
-                    {/* User profile section could go here */}
+                <div className="mt-auto px-2 mb-4">
+                    <a
+                        href="/auth/logout"
+                        className="flex items-center justify-start gap-2 group/sidebar py-2 px-2 hover:bg-red-500/10 rounded-md transition-colors w-full text-red-400 group-hover/sidebar:text-red-300"
+                    >
+                        <div className="flex items-center justify-center rounded-lg w-7 h-7 flex-shrink-0 transition-colors">
+                            <LogOut className="w-5 h-5" />
+                        </div>
+                        <motion.span
+                            animate={{
+                                display: open ? "inline-block" : "none",
+                                opacity: open ? 1 : 0,
+                            }}
+                            className="text-sm transition-colors whitespace-pre inline-block !p-0 !m-0"
+                        >
+                            Logout
+                        </motion.span>
+                    </a>
                 </div>
             </SidebarBody>
         </Sidebar>
