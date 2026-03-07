@@ -2,6 +2,8 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
+import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
+import { cn } from "@/lib/utils";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { FolderKanban, CheckCircle2, Clock, PlayCircle, MoreVertical } from "lucide-react";
 import { motion } from "framer-motion";
@@ -25,7 +27,8 @@ export default function LibraryPage() {
 
     return (
         <DashboardLayout>
-            <div className="relative min-h-[calc(100vh-4rem)] w-full flex flex-col">
+            <div className="relative min-h-screen w-full bg-black">
+                {/* Background Gradient Animation Layer */}
                 <div className="absolute inset-0 z-0">
                     <BackgroundGradientAnimation
                         gradientBackgroundStart="rgb(0, 0, 0)"
@@ -42,6 +45,18 @@ export default function LibraryPage() {
                         containerClassName="absolute inset-0 opacity-40"
                     />
                 </div>
+                {/* Animated Grid Pattern Overlay */}
+                <AnimatedGridPattern
+                    numSquares={40}
+                    maxOpacity={0.3}
+                    duration={1.5}
+                    repeatDelay={0.3}
+                    className={cn(
+                        "fill-teal-400/50 stroke-teal-400/40",
+                        "[mask-image:radial-gradient(900px_circle_at_center,white,transparent)]",
+                        "inset-x-0 inset-y-[-10%] h-[120%] z-[1]",
+                    )}
+                />
                 <div className="relative z-10 p-8 max-w-7xl mx-auto w-full flex-1">
                     <div className="mb-10">
                         <h1 className="text-3xl font-bold text-white mb-2">Video Library</h1>
