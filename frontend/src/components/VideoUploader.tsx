@@ -1,15 +1,12 @@
 "use client";
 
 import { CldUploadWidget } from "next-cloudinary";
+import { UploadCloud } from "lucide-react";
 
 interface VideoUploaderProps {
     onUpload: (publicId: string) => void;
 }
 
-/**
- * Wraps the Cloudinary UploadWidget for video ingestion.
- * Requirement: All creator uploads go through this widget.
- */
 export default function VideoUploader({ onUpload }: VideoUploaderProps) {
     return (
         <CldUploadWidget
@@ -27,12 +24,17 @@ export default function VideoUploader({ onUpload }: VideoUploaderProps) {
             }}
         >
             {({ open }) => (
-                <div className="upload-zone" onClick={() => open()}>
-                    <p style={{ fontSize: "2rem" }}>🎞️</p>
-                    <p>
-                        <strong>Click to upload</strong> or drag and drop
-                    </p>
-                    <p style={{ fontSize: "0.75rem" }}>
+                <div
+                    onClick={() => open()}
+                    className="w-full border-2 border-dashed border-teal-900/50 hover:border-teal-500/50 bg-black hover:bg-teal-900/10 rounded-2xl p-12 flex flex-col items-center justify-center text-center cursor-pointer transition-all group shadow-inner"
+                >
+                    <div className="w-20 h-20 rounded-full bg-teal-900/30 group-hover:bg-teal-800/40 flex items-center justify-center mb-6 transition-colors">
+                        <UploadCloud className="w-10 h-10 text-teal-400 group-hover:text-teal-300 transition-colors" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-teal-400 transition-colors">
+                        Click to upload or drag and drop
+                    </h3>
+                    <p className="text-gray-500 text-sm">
                         MP4, MOV, AVI, WebM · Max 500 MB
                     </p>
                 </div>

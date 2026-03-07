@@ -11,32 +11,26 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ movie }: MovieCardProps) {
-    const posterSrc =
-        movie.Poster !== "N/A" ? movie.Poster : "/placeholder-poster.png";
+    const posterSrc = movie.Poster !== "N/A" ? movie.Poster : "/placeholder-poster.png";
 
     return (
-        <div className="card movie-card" id={`movie-${movie.imdbID}`}>
-            <Image
-                src={posterSrc}
-                alt={`${movie.Title} poster`}
-                width={260}
-                height={360}
-                style={{ width: "100%", height: "360px", objectFit: "cover" }}
-                unoptimized
-            />
-            <div className="movie-card-body">
-                <h3>{movie.Title}</h3>
-                <p>
+        <div className="flex flex-col h-full bg-gray-900 shadow-xl overflow-hidden w-full">
+            <div className="relative w-full aspect-[2/3]">
+                <Image
+                    src={posterSrc}
+                    alt={`${movie.Title} poster`}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                />
+            </div>
+            <div className="p-4 flex flex-col flex-1 bg-gradient-to-t from-black to-gray-900">
+                <h3 className="text-lg font-bold text-white mb-1 line-clamp-1">{movie.Title}</h3>
+                <p className="text-sm text-gray-400 capitalize">
                     {movie.Year} · {movie.Type}
                 </p>
-                <p
-                    style={{
-                        fontSize: "0.7rem",
-                        color: "var(--text-secondary)",
-                        marginTop: "0.25rem",
-                    }}
-                >
-                    {movie.imdbID}
+                <p className="text-xs text-teal-500/50 mt-auto pt-2 font-mono">
+                    ID: {movie.imdbID}
                 </p>
             </div>
         </div>

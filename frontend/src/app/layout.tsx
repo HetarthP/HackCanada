@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "VPP — Virtual Product Placement",
-    description:
-        "AI-powered virtual product placement. Detect 3D ad slots in video and overlay photorealistic brand assets using Cloudinary.",
+    title: "adswap - Where Editor Meets AI",
+    description: "Detect product placement opportunities in videos.",
 };
 
 export default function RootLayout({
@@ -13,30 +13,16 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
-            <body>
-                {/* ── Navbar ─────────────────────────────── */}
-                <nav className="navbar">
-                    <div className="container">
-                        <a href="/" className="navbar-brand">
-                            ▶ VPP
-                        </a>
-                        <ul className="navbar-links">
-                            <li>
-                                <a href="/">Discover</a>
-                            </li>
-                            <li>
-                                <a href="/dashboard">Creator</a>
-                            </li>
-                            <li>
-                                <a href="/brand">Brand</a>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-
-                {/* ── Page Content ───────────────────────── */}
-                <main className="container page">{children}</main>
+        <html lang="en" suppressHydrationWarning>
+            <body className="bg-black text-gray-400 font-sans antialiased min-h-screen selection:bg-teal-500/30 selection:text-white">
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="dark"
+                    enableSystem={false}
+                    disableTransitionOnChange
+                >
+                    {children}
+                </ThemeProvider>
             </body>
         </html>
     );
