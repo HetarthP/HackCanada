@@ -29,3 +29,4 @@ PyJWT[crypto]>=2.9.0
 # Database (async optional)
 psycopg2-binary>=2.9.10
 sqlalchemy>=2.0.36
+prisma>=0.15.0
