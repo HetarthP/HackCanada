@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Sparkles, Mail, Lock, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 
 export default function LoginPage() {
     return (
@@ -25,7 +26,16 @@ export default function LoginPage() {
                 transition={{ duration: 0.4 }}
                 className="w-full max-w-md relative z-10"
             >
-                <div className="bg-gradient-to-b from-gray-900 to-black border border-teal-900/30 rounded-2xl p-8 shadow-2xl">
+                <div className="relative rounded-2xl p-[1px] border border-teal-900/30">
+                    <GlowingEffect
+                        spread={40}
+                        glow={true}
+                        disabled={false}
+                        proximity={64}
+                        inactiveZone={0.01}
+                        borderWidth={2}
+                    />
+                <div className="relative bg-gradient-to-b from-gray-900 to-black rounded-2xl p-8 shadow-2xl">
                     <div className="text-center mb-8">
                         <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
                         <p className="text-gray-400 text-sm">Sign in to continue to your dashboard</p>
@@ -81,6 +91,7 @@ export default function LoginPage() {
                             Continue with Auth0 Single Sign-On
                         </a>
                     </div>
+                </div>
                 </div>
             </motion.div>
         </div>

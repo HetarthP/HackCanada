@@ -2,6 +2,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { BackgroundPaths } from "@/components/ui/background-paths";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { FolderKanban, CheckCircle2, Clock, PlayCircle, MoreVertical } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -40,14 +41,24 @@ export default function LibraryPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.4, delay: idx * 0.1 }}
-                                className="bg-gray-900/50 border border-teal-900/30 rounded-2xl p-6 flex items-center justify-between"
+                                className="relative rounded-2xl border border-teal-900/30 p-[1px]"
                             >
-                                <div>
-                                    <p className="text-gray-400 text-sm font-medium mb-1">{stat.label}</p>
-                                    <p className="text-3xl font-bold text-white">{stat.value}</p>
-                                </div>
-                                <div className={`w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center ${stat.color}`}>
-                                    <stat.icon className="w-6 h-6" />
+                                <GlowingEffect
+                                    spread={40}
+                                    glow={true}
+                                    disabled={false}
+                                    proximity={64}
+                                    inactiveZone={0.01}
+                                    borderWidth={2}
+                                />
+                                <div className="relative bg-gray-900 rounded-2xl p-6 flex items-center justify-between backdrop-blur-xl">
+                                    <div>
+                                        <p className="text-gray-400 text-sm font-medium mb-1">{stat.label}</p>
+                                        <p className="text-3xl font-bold text-white">{stat.value}</p>
+                                    </div>
+                                    <div className={`w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center ${stat.color}`}>
+                                        <stat.icon className="w-6 h-6" />
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -62,46 +73,56 @@ export default function LibraryPage() {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.4, delay: 0.2 + idx * 0.05 }}
-                                className="group bg-gray-900/30 border border-gray-800 hover:border-teal-500/50 rounded-2xl overflow-hidden transition-all hover:shadow-[0_8px_30px_rgba(20,184,166,0.1)] cursor-pointer"
+                                className="relative rounded-2xl border border-gray-800 p-[1px] group cursor-pointer"
                             >
-                                <div className="relative aspect-video w-full bg-gray-800 overflow-hidden">
-                                    <img
-                                        src={project.thumbnail}
-                                        alt={project.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+                                <GlowingEffect
+                                    spread={40}
+                                    glow={true}
+                                    disabled={false}
+                                    proximity={64}
+                                    inactiveZone={0.01}
+                                    borderWidth={2}
+                                />
+                                <div className="relative bg-gray-900 rounded-2xl overflow-hidden transition-all hover:shadow-[0_8px_30px_rgba(20,184,166,0.1)] backdrop-blur-xl">
+                                    <div className="relative aspect-video w-full bg-gray-800 overflow-hidden">
+                                        <img
+                                            src={project.thumbnail}
+                                            alt={project.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
-                                    <div className="absolute top-3 w-full px-3 flex justify-between items-start">
-                                        <div className="px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md text-xs font-medium text-white flex items-center gap-1.5 border border-white/10">
-                                            <Clock className="w-3 h-3" />
-                                            {project.duration}
+                                        <div className="absolute top-3 w-full px-3 flex justify-between items-start">
+                                            <div className="px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md text-xs font-medium text-white flex items-center gap-1.5 border border-white/10">
+                                                <Clock className="w-3 h-3" />
+                                                {project.duration}
+                                            </div>
+                                            <button className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors">
+                                                <MoreVertical className="w-4 h-4" />
+                                            </button>
                                         </div>
-                                        <button className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors">
-                                            <MoreVertical className="w-4 h-4" />
-                                        </button>
+
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="w-12 h-12 rounded-full bg-teal-500/90 text-white flex items-center justify-center shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all">
+                                                <PlayCircle className="w-6 h-6 ml-1" />
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="w-12 h-12 rounded-full bg-teal-500/90 text-white flex items-center justify-center shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all">
-                                            <PlayCircle className="w-6 h-6 ml-1" />
+                                    <div className="p-4">
+                                        <h3 className="text-lg font-semibold text-white mb-1 truncate">{project.title}</h3>
+                                        <div className="flex items-center justify-between mt-3">
+                                            <span className="text-xs text-gray-400">{project.date}</span>
+                                            {project.status === "completed" ? (
+                                                <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                                                    Completed
+                                                </span>
+                                            ) : (
+                                                <span className="px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                                                    Processing
+                                                </span>
+                                            )}
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-4">
-                                    <h3 className="text-lg font-semibold text-white mb-1 truncate">{project.title}</h3>
-                                    <div className="flex items-center justify-between mt-3">
-                                        <span className="text-xs text-gray-400">{project.date}</span>
-                                        {project.status === "completed" ? (
-                                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                                                Completed
-                                            </span>
-                                        ) : (
-                                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                                                Processing
-                                            </span>
-                                        )}
                                     </div>
                                 </div>
                             </motion.div>

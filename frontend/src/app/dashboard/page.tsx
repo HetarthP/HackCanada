@@ -6,6 +6,7 @@ import VideoPlayer from "@/components/VideoPlayer";
 import Link from "next/link";
 import { Plus, Brain, BarChart3, ChevronRight, Video } from "lucide-react";
 import { motion } from "framer-motion";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Suspense } from "react";
 
 function DashboardContent() {
@@ -68,31 +69,51 @@ function DashboardContent() {
 
                         {/* Actions Column */}
                         <div className="space-y-6">
-                            <div className="bg-gradient-to-b from-gray-900 to-black border border-teal-900/30 rounded-2xl p-6 shadow-xl w-full text-left">
-                                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                    <Brain className="w-5 h-5 text-teal-400" />
-                                    AI Detection
-                                </h3>
-                                <p className="text-sm text-gray-400 mb-6">
-                                    Use our Gemini-powered vision model to automatically scan this video for optimal 3D ad placement slots.
-                                </p>
-                                <button className="w-full py-3 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(20,184,166,0.2)] transition-all transform hover:scale-[1.02]">
-                                    <Brain className="w-4 h-4" />
-                                    Detect Ad Slots
-                                </button>
+                            <div className="relative rounded-2xl p-[1px] border border-teal-900/30">
+                                <GlowingEffect
+                                    spread={40}
+                                    glow={true}
+                                    disabled={false}
+                                    proximity={64}
+                                    inactiveZone={0.01}
+                                    borderWidth={2}
+                                />
+                                <div className="relative bg-gradient-to-b from-gray-900 to-black rounded-2xl p-6 shadow-xl w-full text-left">
+                                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                        <Brain className="w-5 h-5 text-teal-400" />
+                                        AI Detection
+                                    </h3>
+                                    <p className="text-sm text-gray-400 mb-6">
+                                        Use our Gemini-powered vision model to automatically scan this video for optimal 3D ad placement slots.
+                                    </p>
+                                    <button className="w-full py-3 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(20,184,166,0.2)] transition-all transform hover:scale-[1.02]">
+                                        <Brain className="w-4 h-4" />
+                                        Detect Ad Slots
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="bg-gradient-to-b from-gray-900 to-black border border-gray-800 rounded-2xl p-6 w-full text-left">
-                                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                    <BarChart3 className="w-5 h-5 text-gray-400" />
-                                    Placement Data
-                                </h3>
-                                <p className="text-sm text-gray-500 mb-6">
-                                    View the generated placement map to fine-tune the scale and mapping of inserted brands.
-                                </p>
-                                <button className="w-full py-3 rounded-xl bg-transparent border-2 border-gray-800 text-gray-300 hover:text-white hover:border-teal-500/50 hover:bg-teal-900/10 font-semibold flex items-center justify-center gap-2 transition-all">
-                                    View Placement Map
-                                </button>
+                            <div className="relative rounded-2xl p-[1px] border border-gray-800">
+                                <GlowingEffect
+                                    spread={40}
+                                    glow={true}
+                                    disabled={false}
+                                    proximity={64}
+                                    inactiveZone={0.01}
+                                    borderWidth={2}
+                                />
+                                <div className="relative bg-gradient-to-b from-gray-900 to-black rounded-2xl p-6 w-full text-left">
+                                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                        <BarChart3 className="w-5 h-5 text-gray-400" />
+                                        Placement Data
+                                    </h3>
+                                    <p className="text-sm text-gray-500 mb-6">
+                                        View the generated placement map to fine-tune the scale and mapping of inserted brands.
+                                    </p>
+                                    <button className="w-full py-3 rounded-xl bg-transparent border-2 border-gray-800 text-gray-300 hover:text-white hover:border-teal-500/50 hover:bg-teal-900/10 font-semibold flex items-center justify-center gap-2 transition-all">
+                                        View Placement Map
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

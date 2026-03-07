@@ -12,6 +12,11 @@ const config: Config = {
             colors: {
                 background: "#000000",
                 foreground: "#f3f4f6",
+                border: "var(--border)",
+                muted: {
+                    DEFAULT: "var(--muted)",
+                    foreground: "var(--muted-foreground)",
+                },
             },
             fontFamily: {
                 sans: ["Inter", "sans-serif"],

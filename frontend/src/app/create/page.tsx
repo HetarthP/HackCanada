@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import ThreeBackground from "@/components/ThreeBackground";
 import { motion } from "framer-motion";
 import { ArrowRight, PlayCircle } from "lucide-react";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 import Link from "next/link";
 
 export default function CreatePage() {
@@ -43,10 +44,20 @@ export default function CreatePage() {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="flex-1 w-full max-w-md mx-auto"
                     >
-                        <div className="relative w-full aspect-video rounded-2xl border border-teal-900/50 bg-gray-900/80 backdrop-blur-xl shadow-2xl overflow-hidden group flex items-center justify-center">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/10 to-transparent pointer-events-none" />
-                            <div className="w-16 h-16 rounded-full bg-teal-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-teal-500/30 transition-all cursor-pointer shadow-lg backdrop-blur-sm">
-                                <PlayCircle className="w-8 h-8 text-teal-400 ml-1" />
+                        <div className="relative w-full aspect-video rounded-2xl border border-teal-900/50 p-[1px]">
+                            <GlowingEffect
+                                spread={40}
+                                glow={true}
+                                disabled={false}
+                                proximity={64}
+                                inactiveZone={0.01}
+                                borderWidth={2}
+                            />
+                            <div className="relative w-full h-full rounded-2xl bg-gray-900/80 backdrop-blur-xl shadow-2xl overflow-hidden group flex items-center justify-center">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/10 to-transparent pointer-events-none" />
+                                <div className="w-16 h-16 rounded-full bg-teal-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-teal-500/30 transition-all cursor-pointer shadow-lg backdrop-blur-sm">
+                                    <PlayCircle className="w-8 h-8 text-teal-400 ml-1" />
+                                </div>
                             </div>
                         </div>
                     </motion.div>
