@@ -12,6 +12,9 @@ export default function BrandPage() {
             <div className="page-header">
                 <h1>Brand Dashboard</h1>
                 <p>Monitor your virtual product placements and conversion metrics.</p>
+                <a href="/brand/chat" className="btn btn-primary mt-4">
+                    💬 Marketing Advisor
+                </a>
             </div>
 
             {/* ── Stats ────────────────────────────── */}
