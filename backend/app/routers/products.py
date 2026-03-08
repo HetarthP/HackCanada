@@ -6,7 +6,10 @@ Each product is a memory prefixed with [PRODUCT] followed by JSON.
 """
 
 import json
-from fastapi import APIRouter, HTTPException, Depends
+import os
+import cloudinary
+import cloudinary.uploader
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Optional
@@ -16,6 +19,13 @@ from app.services import backboard
 
 router = APIRouter()
 
+# Configure Cloudinary from env
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+)
+
 
 # ── Models ─────────────────────────────────────
 
@@ -24,6 +34,7 @@ class ProductCreate(BaseModel):
     cost: str
     plan: str
     status: str = "active"
+    image_url: str = ""
 
 
 class Product(BaseModel):
@@ -32,6 +43,7 @@ class Product(BaseModel):
     cost: str
     plan: str
     status: str
+    image_url: str = ""
 
 
 PRODUCT_TAG = "[PRODUCT] "
@@ -52,6 +64,7 @@ def _parse_product_memory(memory: dict) -> Product | None:
             cost=data.get("cost", ""),
             plan=data.get("plan", ""),
             status=data.get("status", "active"),
+            image_url=data.get("image_url", ""),
         )
     except (json.JSONDecodeError, KeyError):
         return None
@@ -112,6 +125,7 @@ async def add_product(body: ProductCreate, user_id: str = Depends(_get_user_id))
         "cost": body.cost,
         "plan": body.plan,
         "status": body.status,
+        "image_url": body.image_url,
     })
     content = f"{PRODUCT_TAG}{payload}"
     try:
@@ -122,6 +136,7 @@ async def add_product(body: ProductCreate, user_id: str = Depends(_get_user_id))
             cost=body.cost,
             plan=body.plan,
             status=body.status,
+            image_url=body.image_url,
         )
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
@@ -136,3 +151,26 @@ async def delete_product(memory_id: str, user_id: str = Depends(_get_user_id)):
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
+
+
+@router.post("/upload-image")
+async def upload_image(file: UploadFile = File(...), user_id: str = Depends(_get_user_id)):
+    """Upload an image to Cloudinary using backend credentials (bypasses preset constraints)."""
+    try:
+        contents = await file.read()
+        
+        # Uploading directly from bytes
+        # Provide a folder to keep things organized if desired
+        result = cloudinary.uploader.upload(
+            contents,
+            folder="vpp_products",
+            resource_type="auto"
+        )
+        
+        secure_url = result.get("secure_url")
+        if not secure_url:
+            raise HTTPException(status_code=500, detail="Cloudinary upload failed (no URL returned)")
+            
+        return {"url": secure_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Image upload failed: {str(e)}")

@@ -3,6 +3,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import Image from "next/image";
 import {
     Package,
     Plus,
@@ -12,6 +13,8 @@ import {
     Sparkles,
     X,
     Loader2,
+    ImageIcon,
+    Upload,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
@@ -24,6 +27,7 @@ interface Product {
     cost: string;
     plan: string;
     status: string;
+    image_url: string;
 }
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
@@ -52,6 +56,8 @@ export default function ProductsPage() {
     const [name, setName] = useState("");
     const [cost, setCost] = useState("");
     const [plan, setPlan] = useState("");
+    const [imageUrl, setImageUrl] = useState("");
+    const [uploadingImage, setUploadingImage] = useState(false);
 
     const fetchProducts = useCallback(async () => {
         setLoading(true);
@@ -73,6 +79,39 @@ export default function ProductsPage() {
         fetchProducts();
     }, [fetchProducts]);
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const headers = await getAuthHeaders();
+            // remove Content-Type so the browser sets it to multipart/form-data
+            delete headers["Content-Type"];
+
+            const res = await fetch(`${API_URL}/api/products/upload-image`, {
+                method: "POST",
+                headers,
+                body: formData,
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setImageUrl(data.url);
+            } else {
+                console.error("Image upload failed");
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setUploadingImage(false);
+            if (e.target) e.target.value = ""; // reset file input
+        }
+    };
+
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim()) return;
@@ -87,12 +126,14 @@ export default function ProductsPage() {
                     cost: cost.trim() || "Not specified",
                     plan: plan.trim() || "Not specified",
                     status: "active",
+                    image_url: imageUrl,
                 }),
             });
             if (res.ok) {
                 setName("");
                 setCost("");
                 setPlan("");
+                setImageUrl("");
                 setShowForm(false);
                 fetchProducts();
             }
@@ -236,6 +277,52 @@ export default function ProductsPage() {
                                                 className="w-full px-4 py-3 rounded-xl bg-black/60 border border-gray-800 focus:border-teal-500/50 text-white placeholder-gray-600 outline-none text-sm transition-colors resize-none"
                                             />
                                         </div>
+
+                                        {/* Image Upload */}
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                                Product Image
+                                            </label>
+                                            {imageUrl ? (
+                                                <div className="relative w-full h-40 rounded-xl overflow-hidden border border-gray-800">
+                                                    <Image
+                                                        src={imageUrl}
+                                                        alt="Product preview"
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setImageUrl("")}
+                                                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-gray-300 hover:text-white transition-colors"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="relative w-full px-4 py-4 rounded-xl bg-black/60 border border-dashed border-gray-700 hover:border-teal-500/50 text-gray-500 hover:text-teal-400 text-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleImageUpload}
+                                                        disabled={uploadingImage}
+                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                                    />
+                                                    {uploadingImage ? (
+                                                        <>
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                            Uploading...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Upload className="w-4 h-4" />
+                                                            Upload Image (optional)
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <div className="flex gap-3 pt-2">
                                             <button
                                                 type="button"
@@ -351,6 +438,23 @@ export default function ProductsPage() {
                                                 )}
                                             </button>
                                         </div>
+
+                                        {/* Product Image */}
+                                        {product.image_url ? (
+                                            <div className="relative w-full h-36 rounded-xl overflow-hidden mb-4 border border-gray-800/50">
+                                                <Image
+                                                    src={product.image_url}
+                                                    alt={product.name}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="w-full h-28 rounded-xl bg-gray-900/60 border border-gray-800/40 flex flex-col items-center justify-center mb-4">
+                                                <ImageIcon className="w-6 h-6 text-gray-700 mb-1" />
+                                                <span className="text-[10px] text-gray-600">No image</span>
+                                            </div>
+                                        )}
 
                                         {/* Details */}
                                         <div className="space-y-3 flex-1">

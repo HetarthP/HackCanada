@@ -41,7 +41,7 @@ npm run dev                   # → http://localhost:3000
 cd backend
 cp .env.example .env          # Fill in your API keys
 python -m venv .venv
-source .venv/bin/activate     # Windows: .venv\Scripts\activate
+source ./venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload # → http://localhost:8000
 ```
