@@ -11,8 +11,15 @@ export default function WatchPage() {
     const router = useRouter();
     const imdbId = params.id as string;
     
-    // Local Thor diner scene demo video instead of fetching actual movie from iframe
-    const demoVideoSrc = "/thor.mp4";
+    // Local demo videos
+    const isAmericanPsycho = imdbId === "tt0144084";
+    const demoVideoSrc = isAmericanPsycho ? "/american_psycho.mp4" : "/thor.mp4";
+    
+    // Convert 00:31:24:27 and 00:31:29:04 into seconds (assuming 30fps as an approximation)
+    // 31 minutes = 1860s. 24s + 27/30 = 24.9s. Total = 1884.9
+    // 31 minutes = 1860s. 29s + 4/30 = 29.13s. Total = 1889.13
+    const placementStartTime = isAmericanPsycho ? 1884.9 : undefined;
+    const placementEndTime = isAmericanPsycho ? 1889.13 : undefined;
 
     return (
         <DashboardLayout>
@@ -54,7 +61,11 @@ export default function WatchPage() {
 
                     {/* Custom Advanced Video Player with Built-in faux AI Rendering animations */}
                     <div className="w-full relative z-10 flex flex-col gap-8 mt-4">
-                        <VideoPlayer src={demoVideoSrc} />
+                        <VideoPlayer 
+                            src={demoVideoSrc} 
+                            placementStart={placementStartTime}
+                            placementEnd={placementEndTime}
+                        />
                     </div>
                 </div>
             </div>

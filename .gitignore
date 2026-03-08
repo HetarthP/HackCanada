@@ -37,3 +37,7 @@ celerybeat.pid
 
 # Logs
 *.log
+
+# Videos and downloads
+*.mp4
+*.part

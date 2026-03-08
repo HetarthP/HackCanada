@@ -19,17 +19,23 @@ onChange,
 className,
 isEditing = false,
 showPlacement = false,
+placementStartPct,
+placementWidthPct,
+onPlacementClick,
 }: {
 value: number;
 onChange: (value: number) => void;
 className?: string;
 isEditing?: boolean;
 showPlacement?: boolean;
+placementStartPct?: number;
+placementWidthPct?: number;
+onPlacementClick?: () => void;
 }) => {
 return (
   <motion.div
     className={cn(
-      "relative w-full h-1.5 bg-white/20 rounded-full cursor-pointer hover:h-2 transition-all overflow-hidden",
+      "relative w-full h-1.5 bg-white/20 rounded-full cursor-pointer hover:h-2 transition-all",
       isEditing && "animate-pulse shadow-[0_0_15px_rgba(45,212,191,0.5)] bg-teal-900/40",
       className
     )}
@@ -51,16 +57,37 @@ return (
     {/* Placement Bar Sync */}
     {showPlacement && (
         <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute top-0 left-[45%] h-full w-[12%] bg-green-500 rounded-full z-20 shadow-[0_0_10px_rgba(34,197,94,0.8)]"
-        />
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="absolute top-1/2 -translate-y-1/2 bg-green-500 rounded-full z-20 shadow-[0_0_20px_rgba(34,197,94,1)] border-2 border-green-300 flex items-center justify-center group cursor-pointer hover:bg-green-400"
+            onClick={(e) => {
+                e.stopPropagation();
+                onPlacementClick?.();
+            }}
+            style={{
+                left: placementStartPct !== undefined ? `${placementStartPct}%` : "45%",
+                width: placementWidthPct !== undefined ? `max(16px, ${placementWidthPct}%)` : "12%",
+                height: "18px",
+            }}
+        >
+          <div className="absolute -top-10 bg-green-500 text-black text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl before:content-[''] before:absolute before:-bottom-1 before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-green-500">
+            ✨ AI Placement Slot
+          </div>
+        </motion.div>
     )}
   </motion.div>
 );
 };
 
-const VideoPlayer = ({ src }: { src: string }) => {
+const VideoPlayer = ({ 
+  src, 
+  placementStart, 
+  placementEnd 
+}: { 
+  src: string;
+  placementStart?: number;
+  placementEnd?: number;
+}) => {
 const containerRef = useRef<HTMLDivElement>(null);
 const videoRef = useRef<HTMLVideoElement>(null);
 const [isPlaying, setIsPlaying] = useState(false);
@@ -132,6 +159,14 @@ const handleSeek = (value: number) => {
   }
 };
 
+const handleSeekToTime = (timeInSeconds: number) => {
+  if (videoRef.current && videoRef.current.duration) {
+    const safeTime = Math.max(0, Math.min(timeInSeconds, videoRef.current.duration));
+    videoRef.current.currentTime = safeTime;
+    setProgress((safeTime / videoRef.current.duration) * 100);
+  }
+};
+
 const toggleMute = () => {
   if (videoRef.current) {
     videoRef.current.muted = !isMuted;
@@ -182,7 +217,9 @@ return (
     />
 
     <AnimatePresence>
-        {(showPlacement && progress >= 45 && progress <= 57) && (
+        {(showPlacement && 
+          ((placementStart !== undefined && placementEnd !== undefined && currentTime >= placementStart && currentTime <= placementEnd) || 
+           (placementStart === undefined && progress >= 45 && progress <= 57))) && (
             <motion.div
               className="absolute top-8 right-8 z-50"
               initial={{ opacity: 0, scale: 0.8, y: -20 }}
@@ -192,16 +229,16 @@ return (
             >
               <div
                 className={cn(
-                  "group rounded-full border border-black/5 bg-neutral-100/90 text-sm text-black transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900/90 dark:text-white dark:hover:bg-neutral-800 backdrop-blur-md shadow-2xl",
+                  "group rounded-full border border-black/5 bg-neutral-100/90 text-lg md:text-xl text-black transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900/90 dark:text-white dark:hover:bg-neutral-800 backdrop-blur-md shadow-2xl hover:scale-105",
                 )}
                 onClick={(e) => {
                     e.stopPropagation();
                     window.open('https://www.beatsbydre.com/', '_blank');
                 }}
               >
-                <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-2 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400 font-medium">
+                <AnimatedShinyText className="inline-flex items-center justify-center px-8 py-4 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400 font-medium">
                   <span>✨ Learn More: Beats by Dre</span>
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 ease-in-out group-hover:translate-x-1" />
+                  <ArrowRight className="ml-3 h-6 w-6 transition-transform duration-300 ease-in-out group-hover:translate-x-1" />
                 </AnimatedShinyText>
               </div>
             </motion.div>
@@ -227,6 +264,13 @@ return (
               className="flex-1"
               isEditing={isEditing}
               showPlacement={showPlacement}
+              placementStartPct={placementStart !== undefined ? (placementStart / (duration || 1)) * 100 : undefined}
+              placementWidthPct={placementStart !== undefined && placementEnd !== undefined ? ((placementEnd - placementStart) / (duration || 1)) * 100 : undefined}
+              onPlacementClick={() => {
+                const targetTime = placementStart !== undefined ? placementStart : (0.45 * duration);
+                const jumpTime = Math.max(0, targetTime - 2); // Jump to exactly 2 seconds before the clip starts!
+                handleSeekToTime(jumpTime);
+              }}
             />
             <span className="text-white text-base font-medium">{formatTime(duration)}</span>
           </div>
