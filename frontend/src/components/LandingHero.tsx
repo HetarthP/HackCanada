@@ -80,7 +80,7 @@ export function LandingHero({ session }: { session: SessionData | null }) {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4"
                 >
-                    <Link href={session ? "/library" : "/login"} className="w-full sm:w-auto flex">
+                    <Link href={session ? "/create" : "/login"} className="w-full sm:w-auto flex">
                         <ShinyButton className="w-full sm:w-auto transition-transform hover:scale-105 flex items-center justify-center gap-2">
                             <span>Get Started</span>
                             <ArrowRight className="w-5 h-5 relative top-[1px]" />

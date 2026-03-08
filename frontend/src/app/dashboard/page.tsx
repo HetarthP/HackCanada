@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Suspense, useEffect, useState, useCallback } from "react";
 import { CldVideoPlayer } from "next-cloudinary";
 import "next-cloudinary/dist/cld-video-player.css";
-import { AnimatedText } from "@/components/ui/animated-shiny-text";
+import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { LampContainer } from "@/components/ui/lamp";
 
 // This is the hardcoded path to the Cloudinary video
@@ -138,12 +138,11 @@ function DashboardContent() {
                     )}
 
                     {pipelineComplete && (
-                        <AnimatedText 
-                            text="Giving your brand the Spotlight." 
-                            textClassName="text-[2.5rem] md:text-[4rem] font-bold tracking-tight text-center leading-tight z-50 relative"
-                            gradientColors="linear-gradient(90deg, #F8FAFC, #2DD4BF, #F8FAFC)"
-                            className="mt-8 mb-4 w-full flex justify-center !items-center"
-                        />
+                        <div className="mt-8 mb-4 w-full flex justify-center items-center">
+                            <AnimatedShinyText className="text-[2.5rem] md:text-[4rem] font-bold tracking-tight text-center leading-tight z-50 relative max-w-full">
+                                <span>Giving your brand the Spotlight.</span>
+                            </AnimatedShinyText>
+                        </div>
                     )}
 
                     <LampContainer className="pt-20 mt-[-8rem]" isOn={pipelineComplete}>

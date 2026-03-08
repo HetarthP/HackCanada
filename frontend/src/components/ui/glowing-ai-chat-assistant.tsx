@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Send, Info, Bot, X, Maximize2, Sparkles } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { AnimatedAIChat } from './animated-ai-chat';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -34,6 +35,13 @@ const FloatingAiAssistant = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Close chat automatically on navigation
+  const pathname = usePathname();
+  useEffect(() => {
+    setIsExpanded(false);
+    setIsChatOpen(false);
+  }, [pathname]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -196,7 +204,7 @@ const FloatingAiAssistant = () => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="px-2 py-1 text-xs font-medium bg-zinc-800/60 text-zinc-300 rounded-2xl">
-                  GPT-4
+                  Gemini 3.1
                 </span>
                 <span className="px-2 py-1 text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20 rounded-2xl">
                   Pro

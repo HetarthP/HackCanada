@@ -16,6 +16,7 @@ const config: Config = {
                 third: "moveInCircle 40s linear infinite",
                 fourth: "moveHorizontal 40s ease infinite",
                 fifth: "moveInCircle 20s ease infinite",
+                "shiny-text": "shiny-text 8s infinite",
             },
             keyframes: {
                 aurora: {
@@ -40,6 +41,14 @@ const config: Config = {
                     "0%": { transform: "translateY(-50%)" },
                     "50%": { transform: "translateY(50%)" },
                     "100%": { transform: "translateY(-50%)" },
+                },
+                "shiny-text": {
+                    "0%, 90%, 100%": {
+                        "background-position": "calc(-100% - var(--shiny-width)) 0",
+                    },
+                    "30%, 60%": {
+                        "background-position": "calc(100% + var(--shiny-width)) 0",
+                    },
                 },
             },
             colors: {

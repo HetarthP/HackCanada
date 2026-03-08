@@ -1,73 +1,40 @@
-import * as React from "react";
-import { motion, Variants } from "framer-motion";
+import { CSSProperties, FC, ReactNode } from "react";
+
 import { cn } from "@/lib/utils";
 
-interface AnimatedTextProps extends React.HTMLAttributes<HTMLDivElement> {
-  text: string;
-  gradientColors?: string;
-  gradientAnimationDuration?: number;
-  hoverEffect?: boolean;
+interface AnimatedShinyTextProps {
+  children: ReactNode;
   className?: string;
-  textClassName?: string;
+  shimmerWidth?: number;
 }
 
-const AnimatedText = React.forwardRef<HTMLDivElement, AnimatedTextProps>(
-  (
-    {
-      text,
-      gradientColors = "linear-gradient(90deg, #000, #fff, #000)",
-      gradientAnimationDuration = 1,
-      hoverEffect = false,
-      className,
-      textClassName,
-      ...props
-    },
-    ref
-  ) => {
-    const [isHovered, setIsHovered] = React.useState(false);
+const AnimatedShinyText: FC<AnimatedShinyTextProps> = ({
+  children,
+  className,
+  shimmerWidth = 100,
+}) => {
+  return (
+    <p
+      style={
+        {
+          "--shiny-width": `${shimmerWidth}px`,
+        } as CSSProperties
+      }
+      className={cn(
+        "mx-auto max-w-md text-neutral-600/70 dark:text-neutral-400/70",
 
-    const textVariants: Variants = {
-      initial: {
-        backgroundPosition: "0 0",
-      },
-      animate: {
-        backgroundPosition: "100% 0",
-        transition: {
-          duration: gradientAnimationDuration,
-          repeat: Infinity,
-          repeatType: "reverse" as const,
-        },
-      },
-    };
+        // Shine effect
+        "animate-shiny-text bg-clip-text bg-no-repeat [background-position:0_0] [background-size:var(--shiny-width)_100%] [transition:background-position_1s_cubic-bezier(.6,.6,0,1)_infinite]",
 
-    return (
-      <div
-        ref={ref}
-        className={cn("inline-flex items-center", className)}
-        {...props}
-      >
-        <motion.h1
-          className={cn("leading-normal", textClassName)}
-          style={{
-            background: gradientColors,
-            backgroundSize: "200% auto",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            textShadow: isHovered ? "0 0 8px rgba(255,255,255,0.3)" : "none",
-          }}
-          variants={textVariants}
-          initial="initial"
-          animate="animate"
-          onHoverStart={() => hoverEffect && setIsHovered(true)}
-          onHoverEnd={() => hoverEffect && setIsHovered(false)}
-        >
-          {text}
-        </motion.h1>
-      </div>
-    );
-  }
-);
+        // Shine gradient
+        "bg-gradient-to-r from-transparent via-black/80 via-50% to-transparent  dark:via-white/80",
 
-AnimatedText.displayName = "AnimatedText";
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
+};
 
-export { AnimatedText };
+export { AnimatedShinyText };
