@@ -1,13 +1,35 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
+import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import { FolderKanban, CheckCircle2, Clock, PlayCircle, MoreVertical } from "lucide-react";
+import { FolderKanban, CheckCircle2, Clock, PlayCircle, MoreVertical, Edit2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LibraryPage() {
+    const router = useRouter();
+    const [brandProfile, setBrandProfile] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBrand = async () => {
+            try {
+                const res = await fetch("http://localhost:8000/api/brand/auth0|default");
+                const data = await res.json();
+                setBrandProfile(data);
+            } catch (err) {
+                console.error("Failed to fetch brand profile", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchBrand();
+    }, []);
+
     // Mock data for UI demonstration
     const stats = [
         { label: "Total Projects", value: "24", icon: FolderKanban, color: "text-blue-400" },
@@ -23,6 +45,23 @@ export default function LibraryPage() {
         { id: 5, title: "Holiday Promo Concept", duration: "03:10", status: "processing", thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800", date: "Oct 10, 2024" },
         { id: 6, title: "Influencer Recap", duration: "05:45", status: "completed", thumbnail: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800", date: "Oct 05, 2024" },
     ];
+
+    const updateProduct = async () => {
+        const newUrl = prompt("Enter new product image URL:", brandProfile?.product_image_url || "");
+        if (!newUrl) return;
+
+        try {
+            const res = await fetch("http://localhost:8000/api/brand/auth0|default", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ product_image_url: newUrl }),
+            });
+            const data = await res.json();
+            setBrandProfile(data);
+        } catch (err) {
+            console.error("Failed to update product", err);
+        }
+    };
 
     return (
         <DashboardLayout>
@@ -44,10 +83,62 @@ export default function LibraryPage() {
                         containerClassName="absolute inset-0 opacity-40"
                     />
                 </div>
+                {/* Animated Grid Pattern Overlay */}
+                <AnimatedGridPattern
+                    numSquares={40}
+                    maxOpacity={0.3}
+                    duration={1.5}
+                    repeatDelay={0.3}
+                    className={cn(
+                        "fill-teal-400/50 stroke-teal-400/40",
+                        "[mask-image:radial-gradient(900px_circle_at_center,white,transparent)]",
+                        "inset-x-0 inset-y-[-10%] h-[120%] z-[1]",
+                    )}
+                />
                 <div className="relative z-10 p-8 max-w-7xl mx-auto w-full flex-1">
-                    <div className="mb-10">
-                        <h1 className="text-3xl font-bold text-white mb-2">Video Library</h1>
-                        <p className="text-gray-400">Manage your product placement projects and track processing status.</p>
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-white mb-2">Video Library</h1>
+                            <p className="text-gray-400">Manage your product placement projects and track processing status.</p>
+                        </div>
+
+                        {brandProfile && (
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="bg-gray-900/60 backdrop-blur-xl border border-teal-500/20 rounded-2xl p-4 flex items-center gap-4 max-w-md w-full shadow-[0_0_20px_rgba(20,184,166,0.1)]"
+                            >
+                                <div className="h-16 w-16 rounded-xl bg-gray-800 flex-shrink-0 overflow-hidden border border-white/10 group relative">
+                                    <img
+                                        src={brandProfile.product_image_url || "https://res.cloudinary.com/demo/image/upload/v1642157523/sample.jpg"}
+                                        alt="Current Product"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button
+                                            onClick={updateProduct}
+                                            className="text-[10px] text-white font-bold uppercase tracking-wider bg-teal-500/80 px-2 py-1 rounded"
+                                        >
+                                            Change
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="text-white font-bold truncate">{brandProfile.brand_name}</h3>
+                                    <p className="text-teal-400 text-xs font-medium uppercase tracking-wider">{brandProfile.industry}</p>
+                                    <div className="mt-1 flex items-center gap-2">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse" />
+                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight">AI Analysis: High Confidence</span>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={updateProduct}
+                                    className="p-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white transition-colors border border-white/5"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </button>
+                            </motion.div>
+                        )}
                     </div>
 
                     {/* Stats Section */}
@@ -91,6 +182,7 @@ export default function LibraryPage() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.4, delay: 0.2 + idx * 0.05 }}
                                 className="relative rounded-2xl border border-gray-800 p-[1px] group cursor-pointer"
+                                onClick={() => router.push(`/library/${project.id}`)}
                             >
                                 <GlowingEffect
                                     spread={40}

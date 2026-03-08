@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card-v2";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/ui/video-player";
 import {
