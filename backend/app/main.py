@@ -5,21 +5,20 @@ Run: uvicorn app.main:app --reload
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 
 from app.database import db
 
 from app.config import settings
-from app.routers import movies, videos, placements, chat, memory, products, brand
+from app.routers import movies, videos, placements, chat, memory, products
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Connect to the database on startup
-    # await db.connect()
+    await db.connect()
     yield
     # Disconnect from the database on shutdown
-    # await db.disconnect()
+    await db.disconnect()
 
 app = FastAPI(
     title="VPP API",
@@ -44,13 +43,6 @@ app.include_router(placements.router, prefix="/api/placements", tags=["Placement
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 app.include_router(memory.router, prefix="/api/memory", tags=["Memory"])
 app.include_router(products.router, prefix="/api/products", tags=["Products"])
-app.include_router(brand.router, prefix="/api/brand", tags=["Brand"])
-
-# Static files (create directory if it doesn't exist)
-import os
-if not os.path.exists("static"):
-    os.makedirs("static")
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/")

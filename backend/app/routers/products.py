@@ -16,15 +16,14 @@ from typing import Optional
 
 from app.auth import get_current_user, bearer_scheme
 from app.services import backboard
-from app.config import settings
 
 router = APIRouter()
 
-# Configure Cloudinary from settings
+# Configure Cloudinary from env
 cloudinary.config(
-    cloud_name=settings.cloudinary_cloud_name,
-    api_key=settings.cloudinary_api_key,
-    api_secret=settings.cloudinary_api_secret,
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
 )
 
 
@@ -161,14 +160,11 @@ async def upload_image(file: UploadFile = File(...), user_id: str = Depends(_get
         contents = await file.read()
         
         # Uploading directly from bytes
-        # Use anyio.to_thread.run_sync for the blocking cloudinary call
-        import anyio
-        result = await anyio.to_thread.run_sync(
-            lambda: cloudinary.uploader.upload(
-                contents,
-                folder="vpp_products",
-                resource_type="auto"
-            )
+        # Provide a folder to keep things organized if desired
+        result = cloudinary.uploader.upload(
+            contents,
+            folder="vpp_products",
+            resource_type="auto"
         )
         
         secure_url = result.get("secure_url")
