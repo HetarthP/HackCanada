@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.16.0",
+    "@cloudinary/react": "^1.14.4",
+    "@cloudinary/url-gen": "^1.22.0",
     "@paper-design/shaders-react": "^0.0.71",
     "@radix-ui/react-slot": "^1.2.4",
     "@react-three/drei": "^10.7.7",
