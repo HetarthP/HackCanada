@@ -34,7 +34,7 @@ const FloatingAiAssistant = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -140,30 +140,29 @@ const FloatingAiAssistant = () => {
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {/* Floating 3D Glowing AI Logo */}
-      <button 
-        className={`floating-ai-button relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 transform ${
-          isChatOpen ? 'rotate-90' : 'rotate-0'
-        }`}
+      <button
+        className={`floating-ai-button relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 transform ${isChatOpen ? 'rotate-90' : 'rotate-0'
+          }`}
         onClick={() => setIsChatOpen(!isChatOpen)}
         style={{
-          background: 'linear-gradient(135deg, rgba(99,102,241,0.8) 0%, rgba(168,85,247,0.8) 100%)',
-          boxShadow: '0 0 20px rgba(139, 92, 246, 0.7), 0 0 40px rgba(124, 58, 237, 0.5), 0 0 60px rgba(109, 40, 217, 0.3)',
+          background: 'linear-gradient(135deg, rgba(20,184,166,0.8) 0%, rgba(13,148,136,0.8) 100%)',
+          boxShadow: '0 0 20px rgba(20, 184, 166, 0.7), 0 0 40px rgba(20, 184, 166, 0.5), 0 0 60px rgba(15, 118, 110, 0.3)',
           border: '2px solid rgba(255, 255, 255, 0.2)',
         }}
       >
         {/* 3D effect */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/20 to-transparent opacity-30"></div>
-        
+
         {/* Inner glow */}
         <div className="absolute inset-0 rounded-full border-2 border-white/10"></div>
-        
+
         {/* AI Icon */}
         <div className="relative z-10">
-        { isChatOpen ? <X /> :  <Bot className="w-8 h-8 text-white" />}
+          {isChatOpen ? <X /> : <Bot className="w-8 h-8 text-white" />}
         </div>
-        
+
         {/* Glowing animation */}
-        <div className="absolute inset-0 rounded-full animate-ping opacity-20 bg-indigo-500"></div>
+        <div className="absolute inset-0 rounded-full animate-ping opacity-20 bg-teal-500"></div>
       </button>
 
       {isExpanded && (
@@ -180,7 +179,7 @@ const FloatingAiAssistant = () => {
 
       {/* Chat Interface */}
       {isChatOpen && !isExpanded && (
-        <div 
+        <div
           ref={chatRef}
           className="absolute bottom-20 right-0 w-[420px] max-w-[90vw] transition-all duration-300 origin-bottom-right"
           style={{
@@ -188,7 +187,7 @@ const FloatingAiAssistant = () => {
           }}
         >
           <div className="relative flex flex-col rounded-3xl bg-gradient-to-br from-zinc-800/80 to-zinc-900/90 border border-zinc-500/50 shadow-2xl backdrop-blur-3xl overflow-hidden" style={{ maxHeight: '70vh' }}>
-            
+
             {/* Header */}
             <div className="flex items-center justify-between px-6 pt-4 pb-2 shrink-0">
               <div className="flex items-center gap-1.5">
@@ -202,14 +201,14 @@ const FloatingAiAssistant = () => {
                 <span className="px-2 py-1 text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20 rounded-2xl">
                   Pro
                 </span>
-                <button 
+                <button
                   onClick={() => setIsExpanded(true)}
                   className="p-1.5 rounded-full hover:bg-zinc-700/50 transition-colors"
                   title="Expand to Fullscreen"
                 >
                   <Maximize2 className="w-4 h-4 text-zinc-400" />
                 </button>
-                <button 
+                <button
                   onClick={() => setIsChatOpen(false)}
                   className="p-1.5 rounded-full hover:bg-zinc-700/50 transition-colors"
                 >
@@ -226,16 +225,15 @@ const FloatingAiAssistant = () => {
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                      msg.role === "user"
-                        ? "bg-gradient-to-r from-red-600 to-red-500 text-white rounded-br-md"
+                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${msg.role === "user"
+                        ? "bg-gradient-to-r from-teal-500 to-teal-400 text-black font-medium rounded-br-md"
                         : "bg-zinc-700/60 text-zinc-100 border border-zinc-600/30 rounded-bl-md"
-                    }`}
+                      }`}
                   >
                     {msg.role === "assistant" && (
                       <div className="flex items-center gap-1.5 mb-1">
-                        <Sparkles className="w-3 h-3 text-violet-400" />
-                        <span className="text-[10px] font-medium text-violet-400/80 uppercase tracking-wider">Spotlight AI</span>
+                        <Sparkles className="w-3 h-3 text-teal-400" />
+                        <span className="text-[10px] font-medium text-teal-400/80 uppercase tracking-wider">Spotlight AI</span>
                       </div>
                     )}
                     <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -248,8 +246,8 @@ const FloatingAiAssistant = () => {
                 <div className="flex justify-start">
                   <div className="bg-zinc-700/60 border border-zinc-600/30 rounded-2xl rounded-bl-md px-4 py-3">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <Sparkles className="w-3 h-3 text-violet-400" />
-                      <span className="text-[10px] font-medium text-violet-400/80 uppercase tracking-wider">Spotlight AI</span>
+                      <Sparkles className="w-3 h-3 text-teal-400" />
+                      <span className="text-[10px] font-medium text-teal-400/80 uppercase tracking-wider">Spotlight AI</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
@@ -294,10 +292,10 @@ const FloatingAiAssistant = () => {
                   </div>
 
                   {/* Send Button */}
-                  <button 
+                  <button
                     onClick={handleSend}
                     disabled={!message.trim() || loading}
-                    className="group relative p-2.5 bg-gradient-to-r from-red-600 to-red-500 border-none rounded-xl cursor-pointer transition-all duration-300 text-white shadow-lg hover:from-red-500 hover:to-red-400 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="group relative p-2.5 bg-gradient-to-r from-teal-500 to-teal-400 border-none rounded-xl cursor-pointer transition-all duration-300 text-black shadow-lg shadow-teal-500/20 hover:from-teal-400 hover:to-teal-300 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -306,16 +304,16 @@ const FloatingAiAssistant = () => {
             </div>
 
             {/* Floating Overlay */}
-            <div 
+            <div
               className="absolute inset-0 rounded-3xl pointer-events-none"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent, rgba(147, 51, 234, 0.05))' 
+              style={{
+                background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.05), transparent, rgba(45, 212, 191, 0.05))'
               }}
             ></div>
           </div>
         </div>
       )}
-      
+
       {/* CSS for animations */}
       <style jsx>{`
         @keyframes popIn {
@@ -331,7 +329,7 @@ const FloatingAiAssistant = () => {
         
         .floating-ai-button:hover {
           transform: scale(1.1) rotate(5deg);
-          box-shadow: 0 0 30px rgba(139, 92, 246, 0.9), 0 0 50px rgba(124, 58, 237, 0.7), 0 0 70px rgba(109, 40, 217, 0.5);
+          box-shadow: 0 0 30px rgba(20, 184, 166, 0.9), 0 0 50px rgba(20, 184, 166, 0.7), 0 0 70px rgba(15, 118, 110, 0.5);
         }
       `}</style>
     </div>

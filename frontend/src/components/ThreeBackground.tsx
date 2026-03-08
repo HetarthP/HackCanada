@@ -12,7 +12,7 @@ function DottedSurface() {
 
     const { positions, color } = useMemo(() => {
         const positions = new Float32Array(gridSize * gridSize * 3);
-        const color = new THREE.Color(0.08, 0.72, 0.65); // Teal
+        const color = new THREE.Color(0.0, 0.9, 0.85); // Brighter Teal Blue
 
         for (let i = 0; i < gridSize; i++) {
             for (let j = 0; j < gridSize; j++) {
@@ -47,14 +47,14 @@ function DottedSurface() {
                 {/* @ts-expect-error - r3f type discrepancy */}
                 <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
             </bufferGeometry>
-            <pointsMaterial size={0.15} color={color} transparent opacity={0.6} />
+            <pointsMaterial size={0.18} color={color} transparent opacity={0.9} />
         </points>
     );
 }
 
 export default function ThreeBackground() {
     return (
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-80">
             <Canvas camera={{ position: [0, 15, 30], fov: 60 }}>
                 <DottedSurface />
             </Canvas>
