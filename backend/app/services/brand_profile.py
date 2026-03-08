@@ -43,12 +43,13 @@ from typing import Optional
 
 # Empty profile returned for every new user
 _NEW_USER_PROFILE = {
-    "brand_name": "Unknown",
-    "industry": "Unknown",
-    "budget": "Not specified",
-    "target_demo": "Not specified",
-    "tone": "Professional",
-    "goals": "Not specified",
+    "brand_name": "Tim Hortons",
+    "industry": "Coffee & Food",
+    "budget": "$100,000",
+    "target_demo": "All demographics",
+    "tone": "Warm, welcoming, iconic",
+    "goals": "Seamless product integration in high-visibility content",
+    "product_image_url": "http://localhost:8000/static/tims.png"
 }
 
 

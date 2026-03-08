@@ -39,7 +39,7 @@ export default function VideoAnalysisPage() {
         target_demo: "All demographics",
         tone: "Warm, welcoming, iconic",
         goals: "Seamless product integration in high-visibility content",
-        product_image_url: "http://localhost:8000/static/tims.png"
+        product_image_url: "/tims.png"
     });
 
     // Served directly from Next.js public folder for instant loading

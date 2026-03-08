@@ -4,15 +4,18 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
-import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import { FolderKanban, CheckCircle2, Clock, PlayCircle, MoreVertical, Edit2 } from "lucide-react";
+import { FolderKanban, CheckCircle2, Clock, PlayCircle, MoreVertical, Edit2, Coffee } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LibraryPage() {
     const router = useRouter();
-    const [brandProfile, setBrandProfile] = useState<any>(null);
+    const [brandProfile, setBrandProfile] = useState<any>({
+        brand_name: "Tim Hortons",
+        industry: "Coffee & Food",
+        product_image_url: "/tims.png"
+    });
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -38,12 +41,12 @@ export default function LibraryPage() {
     ];
 
     const projects = [
-        { id: 1, title: "Summer Campaign 2024", duration: "02:45", status: "completed", thumbnail: "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&q=80&w=800", date: "Oct 24, 2024" },
-        { id: 2, title: "Product Launch Teaser", duration: "01:15", status: "processing", thumbnail: "https://images.unsplash.com/photo-1563298723-dcfebaa392e3?auto=format&fit=crop&q=80&w=800", date: "Oct 22, 2024" },
-        { id: 3, title: "Social Media Ad V2", duration: "00:30", status: "completed", thumbnail: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&q=80&w=800", date: "Oct 18, 2024" },
-        { id: 4, title: "Internal Training Q3", duration: "12:20", status: "completed", thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800", date: "Oct 15, 2024" },
-        { id: 5, title: "Holiday Promo Concept", duration: "03:10", status: "processing", thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800", date: "Oct 10, 2024" },
-        { id: 6, title: "Influencer Recap", duration: "05:45", status: "completed", thumbnail: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800", date: "Oct 05, 2024" },
+        { id: 1, title: "Espresso Scene Diagnostic", duration: "9:37", status: "completed", thumbnail: "/coffee.jpg", date: "Oct 24, 2024" },
+        { id: 2, title: "Summer Campaign 2024", duration: "02:45", status: "completed", thumbnail: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=800", date: "Oct 22, 2024" },
+        { id: 3, title: "Product Launch Teaser", duration: "01:15", status: "processing", thumbnail: "https://images.unsplash.com/photo-1563298723-dcfebaa392e3?auto=format&fit=crop&q=80&w=800", date: "Oct 20, 2024" },
+        { id: 4, title: "Social Media Ad V2", duration: "00:30", status: "completed", thumbnail: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&q=80&w=800", date: "Oct 18, 2024" },
+        { id: 5, title: "Internal Training Q3", duration: "12:20", status: "completed", thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800", date: "Oct 15, 2024" },
+        { id: 6, title: "Holiday Promo Concept", duration: "03:10", status: "processing", thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800", date: "Oct 10, 2024" },
     ];
 
     const updateProduct = async () => {
@@ -83,18 +86,6 @@ export default function LibraryPage() {
                         containerClassName="absolute inset-0 opacity-40"
                     />
                 </div>
-                {/* Animated Grid Pattern Overlay */}
-                <AnimatedGridPattern
-                    numSquares={40}
-                    maxOpacity={0.3}
-                    duration={1.5}
-                    repeatDelay={0.3}
-                    className={cn(
-                        "fill-teal-400/50 stroke-teal-400/40",
-                        "[mask-image:radial-gradient(900px_circle_at_center,white,transparent)]",
-                        "inset-x-0 inset-y-[-10%] h-[120%] z-[1]",
-                    )}
-                />
                 <div className="relative z-10 p-8 max-w-7xl mx-auto w-full flex-1">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                         <div>
@@ -127,7 +118,7 @@ export default function LibraryPage() {
                                     <h3 className="text-white font-bold truncate">{brandProfile.brand_name}</h3>
                                     <p className="text-teal-400 text-xs font-medium uppercase tracking-wider">{brandProfile.industry}</p>
                                     <div className="mt-1 flex items-center gap-2">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse" />
+                                        <Coffee className="w-3 h-3 text-teal-400" />
                                         <span className="text-[10px] text-gray-400 font-medium tracking-tight">AI Analysis: High Confidence</span>
                                     </div>
                                 </div>
