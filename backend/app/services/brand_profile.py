@@ -49,7 +49,7 @@ _NEW_USER_PROFILE = {
     "target_demo": "All demographics",
     "tone": "Warm, welcoming, iconic",
     "goals": "Seamless product integration in high-visibility content",
-    "product_image_url": "http://localhost:8000/static/tims.png"
+    "product_image_url": "/tims.png"
 }
 
 
