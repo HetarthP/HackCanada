@@ -76,9 +76,10 @@ async def get_or_create_thread(assistant_id: str, user_id: str) -> str:
         return thread_id
 
 
-async def send_message(thread_id: str, content: str) -> str:
+async def send_message(thread_id: str, content: str, memory: str = "Auto") -> str:
     """
-    Send a user message to Backboard with memory="Auto".
+    Send a user message to Backboard.
+    *memory* can be "Auto", "On", "Off", or "Readonly".
     Returns the assistant's reply text.
     """
     async with httpx.AsyncClient() as client:
@@ -88,9 +89,111 @@ async def send_message(thread_id: str, content: str) -> str:
             data={
                 "content": content,
                 "stream": "false",
-                "memory": "Auto",
+                "memory": memory,
             },
             timeout=60,  # LLM generation can be slow
         )
         resp.raise_for_status()
         return resp.json().get("content", "")
+
+
+# ── Memory management ──────────────────────────
+
+
+async def list_memories(assistant_id: str) -> list[dict]:
+    """Return every memory stored for the assistant."""
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            f"{BASE_URL}/assistants/{assistant_id}/memories",
+            headers=_headers(),
+            timeout=15,
+        )
+        resp.raise_for_status()
+        return resp.json().get("memories", [])
+
+
+async def add_memory(assistant_id: str, content: str) -> dict:
+    """Manually seed a memory into the assistant's knowledge base."""
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{BASE_URL}/assistants/{assistant_id}/memories",
+            headers=_headers(),
+            json={"content": content},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
+async def delete_memory(assistant_id: str, memory_id: str) -> dict:
+    """Delete a specific memory by ID."""
+    async with httpx.AsyncClient() as client:
+        resp = await client.delete(
+            f"{BASE_URL}/assistants/{assistant_id}/memories/{memory_id}",
+            headers=_headers(),
+            timeout=15,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
+async def memory_stats(assistant_id: str) -> dict:
+    """Return memory usage stats (total count, etc.)."""
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            f"{BASE_URL}/assistants/{assistant_id}/memories/stats",
+            headers=_headers(),
+            timeout=15,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
+# ── Document uploads ───────────────────────────
+
+
+async def upload_document_to_assistant(
+    assistant_id: str, filename: str, file_bytes: bytes, content_type: str
+) -> dict:
+    """
+    Upload a document to the assistant (shared across all threads).
+    The file is chunked, embedded, and made available for RAG.
+    """
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{BASE_URL}/assistants/{assistant_id}/documents",
+            headers=_headers(),
+            files={"file": (filename, file_bytes, content_type)},
+            timeout=60,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
+async def upload_document_to_thread(
+    thread_id: str, filename: str, file_bytes: bytes, content_type: str
+) -> dict:
+    """
+    Upload a document scoped to a single thread.
+    """
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"{BASE_URL}/threads/{thread_id}/documents",
+            headers=_headers(),
+            files={"file": (filename, file_bytes, content_type)},
+            timeout=60,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
+async def get_document_status(document_id: str) -> dict:
+    """Poll the processing status of a previously uploaded document."""
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            f"{BASE_URL}/documents/{document_id}/status",
+            headers=_headers(),
+            timeout=15,
+        )
+        resp.raise_for_status()
+        return resp.json()

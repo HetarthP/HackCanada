@@ -18,7 +18,7 @@ google-genai>=1.0.0
 # Celery + Redis + Vultr Worker Nodes
 celery[redis]>=5.4.0
 redis>=5.2.0
-vultr-python>=1.0.0
+vultr>=1.0.0
 
 # CORS
 python-multipart>=0.0.18
