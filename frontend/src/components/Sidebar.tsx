@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink, useSidebar } from "./ui/sidebar";
-import { Sparkles, Home, Library, Settings, Plus, MessageCircle, LogOut, BarChart2 } from "lucide-react";
+import { Sparkles, LayoutDashboard, Video, Scan, Store, BarChart2, Settings, Plus, MessageCircle, LogOut } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -12,9 +12,12 @@ export function CustomSidebar() {
     const [open, setOpen] = useState(false);
 
     const navItems = [
-        { name: "Home", href: "/", icon: Home },
-        { name: "Video Library", href: "/library", icon: Library },
+        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+        { name: "Video Library", href: "/library", icon: Video },
+        { name: "Ad Slot Detection", href: "/select-video", icon: Scan },
+        { name: "Brand Marketplace", href: "/catalog", icon: Store },
         { name: "Analytics", href: "/dashboard/analytics", icon: BarChart2 },
+        { name: "Settings", href: "/settings", icon: Settings },
     ];
 
     return (
