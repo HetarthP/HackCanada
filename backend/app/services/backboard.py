@@ -2,9 +2,11 @@
 Backboard.io service — persistent memory chatbot.
 
 Wraps the Backboard REST API to manage:
-  • A single Ghost-Merchant marketing assistant
-  • Per-user conversation threads with shared memory
+  • Per-user assistants (each user gets their own memory store)
+  • Per-user conversation threads with isolated memory
   • Message sending with memory="Auto" for cross-session recall
+  • Memory management (list, add, delete, stats)
+  • Document uploads (assistant-level and thread-level)
 
 Docs: https://docs.backboard.io/
 """
@@ -16,32 +18,35 @@ from app.config import settings
 
 BASE_URL = "https://app.backboard.io/api"
 
-# In-memory cache of user_id → thread_id.
-# FUTURE: persist in Redis or the database so threads survive restarts.
-_user_threads: dict[str, str] = {}
+# In-memory cache of user_id → assistant_id.
+# Each user gets their own assistant so memories are isolated per user.
+# FUTURE: persist in Redis or the database so mappings survive restarts.
+_user_assistants: dict[str, str] = {}
 
-# Cached assistant ID (created once per process lifetime)
-_assistant_id: str | None = None
+# In-memory cache of user_id → thread_id.
+_user_threads: dict[str, str] = {}
 
 
 def _headers() -> dict[str, str]:
     return {"X-API-Key": settings.backboard_api_key}
 
 
-async def ensure_assistant(system_prompt: str) -> str:
+async def ensure_assistant(system_prompt: str, user_id: str = "default") -> str:
     """
-    Create the Ghost-Merchant marketing assistant on Backboard
-    (or return the cached ID if already created this session).
+    Create a per-user Backboard assistant (or return the cached ID).
+
+    Each user gets their own assistant so that Backboard's memory
+    system is completely isolated per user — memories saved from
+    one user's conversations will never leak to another user.
     """
-    global _assistant_id
-    if _assistant_id is not None:
-        return _assistant_id
+    if user_id in _user_assistants:
+        return _user_assistants[user_id]
 
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{BASE_URL}/assistants",
             json={
-                "name": "Ghost-Merchant Marketing Advisor",
+                "name": f"Spotlight AI – {user_id[:20]}",
                 "system_prompt": system_prompt,
                 "description": "Marketing strategist for Virtual Product Placement",
                 "embedding_provider": "openai",
@@ -52,8 +57,9 @@ async def ensure_assistant(system_prompt: str) -> str:
             timeout=15,
         )
         resp.raise_for_status()
-        _assistant_id = resp.json()["assistant_id"]
-        return _assistant_id
+        assistant_id = resp.json()["assistant_id"]
+        _user_assistants[user_id] = assistant_id
+        return assistant_id
 
 
 async def get_or_create_thread(assistant_id: str, user_id: str) -> str:
@@ -147,6 +153,11 @@ async def memory_stats(assistant_id: str) -> dict:
         )
         resp.raise_for_status()
         return resp.json()
+
+
+def get_assistant_id_for_user(user_id: str) -> str | None:
+    """Return the cached assistant ID for a user, or None."""
+    return _user_assistants.get(user_id)
 
 
 # ── Document uploads ───────────────────────────

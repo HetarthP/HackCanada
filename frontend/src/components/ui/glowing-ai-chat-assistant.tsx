@@ -57,9 +57,28 @@ const FloatingAiAssistant = () => {
     setLoading(true);
 
     try {
+      // Try to get Auth0 access token for per-user memory isolation
+      let accessToken: string | null = null;
+      try {
+        const tokenRes = await fetch("/auth/access-token");
+        if (tokenRes.ok) {
+          const tokenData = await tokenRes.json();
+          accessToken = tokenData.token || tokenData.accessToken || null;
+        }
+      } catch {
+        // Not authenticated — continue anonymously
+      }
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+
       const res = await fetch(`${API_URL}/api/chat/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ message: trimmed }),
       });
 

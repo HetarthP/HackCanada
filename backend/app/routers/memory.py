@@ -49,14 +49,15 @@ class DocumentStatusResponse(BaseModel):
 # ── Helpers ────────────────────────────────────────
 
 
-async def _require_assistant() -> str:
-    """Return the cached assistant ID, or raise 400 if not yet created."""
-    if backboard._assistant_id is None:
+async def _require_assistant(user_id: str = "auth0|default") -> str:
+    """Return the cached assistant ID for a user, or raise 400 if not yet created."""
+    assistant_id = backboard.get_assistant_id_for_user(user_id)
+    if assistant_id is None:
         raise HTTPException(
             status_code=400,
-            detail="Assistant not created yet — send a chat message first.",
+            detail=f"No assistant found for user '{user_id}' — send a chat message first.",
         )
-    return backboard._assistant_id
+    return assistant_id
 
 
 # ── Memory endpoints ──────────────────────────────

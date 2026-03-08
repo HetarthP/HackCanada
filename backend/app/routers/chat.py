@@ -29,24 +29,28 @@ class ChatResponse(BaseModel):
 
 
 def _build_system_prompt(profile: dict) -> str:
-    """Construct a brand-aware system prompt for Ghost-Merchant."""
+    """Construct a brand-aware system prompt for Spotlight AI."""
+    brand_known = profile.get("brand_name", "Unknown") != "Unknown"
+
+    if brand_known:
+        brand_ctx = (
+            f"User's brand: {profile['brand_name']} ({profile['industry']}). "
+            f"Budget: {profile['budget']}. Demo: {profile['target_demo']}. "
+            f"Tone: {profile.get('tone', 'Professional')}. "
+            f"Goals: {profile.get('goals', 'Brand awareness')}."
+        )
+    else:
+        brand_ctx = (
+            "New user — no brand info yet. Greet them and naturally learn "
+            "their brand name, industry, budget, target demo, and goals."
+        )
+
     return (
-        "You are an expert marketing strategist for Ghost-Merchant, "
-        "an AI-powered Virtual Product Placement platform.\n\n"
-        f"The user represents **{profile['brand_name']}** in the "
-        f"**{profile['industry']}** sector with a budget of "
-        f"**{profile['budget']}**.\n"
-        f"Target demographic: **{profile['target_demo']}**.\n"
-        f"Brand tone: **{profile.get('tone', 'Professional')}**.\n"
-        f"Campaign goals: **{profile.get('goals', 'Brand awareness')}**.\n\n"
-        "Tailor every response to this brand profile. Provide actionable, "
-        "data-driven VPP strategies including:\n"
-        "• Which types of video content to target for placements\n"
-        "• Optimal placement positions and durations\n"
-        "• Budget allocation recommendations\n"
-        "• Expected performance metrics (CPM, CTR, engagement)\n"
-        "• Creative direction that matches the brand tone\n\n"
-        "Keep responses concise but insightful. Use markdown formatting."
+        "You are Spotlight AI, a VPP (Virtual Product Placement) marketing strategist. "
+        f"{brand_ctx}\n\n"
+        "You have persistent memory across sessions. Facts you learn are saved automatically. "
+        "Give concise, actionable VPP advice: content targeting, placement strategy, "
+        "budget allocation, and expected metrics. Use markdown."
     )
 
 
@@ -82,6 +86,7 @@ async def chat(
       6. Return the assistant's reply
     """
     # Use authenticated user ID or fallback to anonymous
+    is_authenticated = user is not None
     user_id = user.get("sub", "auth0|default") if user else "auth0|default"
 
     # 1) Fetch brand context
@@ -92,11 +97,12 @@ async def chat(
 
     # 3) Ensure assistant + thread exist
     try:
-        assistant_id = await backboard.ensure_assistant(system_prompt)
+        assistant_id = await backboard.ensure_assistant(system_prompt, user_id)
         thread_id = await backboard.get_or_create_thread(assistant_id, user_id)
 
-        # 4) Send message with persistent memory
-        reply = await backboard.send_message(thread_id, body.message)
+        # 4) Send message — only authenticated users get persistent memory
+        memory_mode = "Auto" if is_authenticated else "Off"
+        reply = await backboard.send_message(thread_id, body.message, memory=memory_mode)
     except Exception as e:
         raise HTTPException(
             status_code=502,

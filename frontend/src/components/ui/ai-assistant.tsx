@@ -27,7 +27,7 @@ const AIAssistant = ({ mode = "page", onClose }: AIAssistantProps) => {
       // Try to get an access token from the Next.js Auth0 route
       let accessToken: string | null = null;
       try {
-        const tokenRes = await fetch("/auth/token");
+        const tokenRes = await fetch("/auth/access-token");
         if (tokenRes.ok) {
           const tokenData = await tokenRes.json();
           accessToken = tokenData.token || tokenData.accessToken || null;
